@@ -6,14 +6,14 @@ class MediaViewer extends StatefulWidget {
   final List<String> mediaItems;
   final int imageCount;
 
-  const MediaViewer({required this.mediaItems, required this.imageCount});
+  const MediaViewer({super.key, required this.mediaItems, required this.imageCount});
 
   @override
   State<MediaViewer> createState() => _MediaViewerState();
 }
 
 class _MediaViewerState extends State<MediaViewer> {
-  PageController _controller = PageController();
+  final PageController _controller = PageController();
   int currentPage = 0;
 
   @override
@@ -74,7 +74,7 @@ class _MediaViewerState extends State<MediaViewer> {
 class FullScreenVideo extends StatefulWidget {
   final String videoUrl;
 
-  const FullScreenVideo({required this.videoUrl});
+  const FullScreenVideo({super.key, required this.videoUrl});
 
   @override
   State<FullScreenVideo> createState() => _FullScreenVideoState();

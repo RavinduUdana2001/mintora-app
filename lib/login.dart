@@ -8,18 +8,20 @@ import 'signup.dart';
 import 'homepage.dart';
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({Key? key}) : super(key: key);
+  const LoginPage({super.key});
+
   @override
   State<LoginPage> createState() => _LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMixin {
+class _LoginPageState extends State<LoginPage>
+    with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   bool _obscureText = true;
   bool _isLoading = false;
   String _email = '';
   String _password = '';
-  
+
   late AnimationController _controller;
   late Animation<double> _fadeIn;
   late Animation<double> _slideUp;
@@ -56,36 +58,41 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
     setState(() => _isLoading = true);
 
     try {
-      final response = await http.post(
-        Uri.parse(_apiUrl),
-        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-        body: {'email': _email, 'password': _password},
-      ).timeout(const Duration(seconds: 10));
+      final response = await http
+          .post(
+            Uri.parse(_apiUrl),
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            body: {'email': _email, 'password': _password},
+          )
+          .timeout(const Duration(seconds: 10));
 
       final data = jsonDecode(response.body);
 
-      if (response.statusCode == 200 && data['status'] == 'success') {
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('userName', data['name']);
-        await prefs.setString('userEmail', data['email']);
-        await prefs.setString('profileImage', data['profile_image'] ?? 'assets/default.png');
-        await prefs.setString('createdAt', data['created_at'] ?? '');
+      // inside: if (response.statusCode == 200 && data['status'] == 'success') {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('userName', data['name']);
+      await prefs.setString('userEmail', data['email']);
+      await prefs.setString(
+        'profileImage',
+        data['profile_image'] ?? 'assets/default.png',
+      );
+      await prefs.setString('createdAt', data['created_at'] ?? '');
 
-        Navigator.pushReplacement(
-          context,
-          PageRouteBuilder(
-            pageBuilder: (context, animation, secondaryAnimation) => HomePage(),
-            transitionsBuilder: (context, animation, secondaryAnimation, child) {
-              return FadeTransition(
-                opacity: animation,
-                child: child,
-              );
-            },
-          ),
-        );
-      } else {
-        _showError(data['message'] ?? 'Login failed');
-      }
+      // 👇 NEW: mark as logged in (forever)
+      await prefs.setBool('isLoggedIn', true);
+
+      // (Optional) clean up any old expiry keys in case they existed
+      await prefs.remove('loginExpiresAt');
+
+      Navigator.pushReplacement(
+        context,
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) => HomePage(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(opacity: animation, child: child);
+          },
+        ),
+      );
     } on TimeoutException {
       _showError('Connection timeout.');
     } on SocketException {
@@ -103,9 +110,7 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
         content: Text(message),
         backgroundColor: Colors.red,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
     );
   }
@@ -115,18 +120,22 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
     return Scaffold(
       body: Stack(
         children: [
-          // 🌌 Modern Dark Gradient Background
+          // Background Gradient
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
-                colors: [Color(0xFF1e1e2c), Color(0xFF2b2d42), Color(0xFF3a506b)],
+                colors: [
+                  Color(0xFF1e1e2c),
+                  Color(0xFF2b2d42),
+                  Color(0xFF3a506b),
+                ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
             ),
           ),
 
-          // 💎 Glass Card Login Form with Animation
+          // Glass Card Login Form
           Center(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 48),
@@ -142,12 +151,12 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                       color: Colors.white.withOpacity(0.06),
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(color: Colors.white.withOpacity(0.1)),
-                      boxShadow: [
+                      boxShadow: const [
                         BoxShadow(
                           color: Colors.black26,
                           blurRadius: 16,
-                          offset: const Offset(0, 8),
-                        )
+                          offset: Offset(0, 8),
+                        ),
                       ],
                     ),
                     padding: const EdgeInsets.all(24),
@@ -156,24 +165,46 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          // 🔒 Logo and Title (Centered)
-                          const Icon(Icons.lock_open_rounded, 
-                            size: 64, 
+                          // Logo and Title
+                          const Icon(
+                            Icons.lock_open_rounded,
+                            size: 64,
                             color: Colors.white,
                           ),
                           const SizedBox(height: 16),
-                          Text(
-                            "Welcome to Mintora",
-                            style: TextStyle(
-                              fontSize: 26,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                              letterSpacing: 1,
-                            ),
+
+                          // Centered Title Text
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              const Text(
+                                "Welcome to",
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 26,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                  letterSpacing: 1,
+                                ),
+                              ),
+                              Text(
+                                "Mintora",
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 26,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.tealAccent.shade100,
+                                  letterSpacing: 1,
+                                ),
+                              ),
+                            ],
                           ),
+
                           const SizedBox(height: 8),
-                          Text(
-                            "Login to continue to Mintora",
+                          const Text(
+                            "Login to continue",
+                            textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 14,
                               color: Colors.white70,
@@ -181,20 +212,24 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                           ),
                           const SizedBox(height: 30),
 
-                          // 📧 Email Field
+                          // Email Field
                           TextFormField(
                             style: const TextStyle(color: Colors.white),
-                            decoration: _glassInput("Email", Icons.email_outlined),
+                            decoration: _glassInput(
+                              "Email",
+                              Icons.email_outlined,
+                            ),
                             keyboardType: TextInputType.emailAddress,
                             onSaved: (val) => _email = val!.trim(),
-                            validator: (val) => 
-                              val == null || !val.contains('@') 
-                                ? 'Enter a valid email' 
-                                : null,
+                            validator:
+                                (val) =>
+                                    val == null || !val.contains('@')
+                                        ? 'Enter a valid email'
+                                        : null,
                           ),
                           const SizedBox(height: 20),
 
-                          // 🔑 Password Field
+                          // Password Field
                           TextFormField(
                             obscureText: _obscureText,
                             style: const TextStyle(color: Colors.white),
@@ -203,92 +238,96 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                               Icons.lock_outline,
                               suffix: IconButton(
                                 icon: Icon(
-                                  _obscureText 
-                                    ? Icons.visibility 
-                                    : Icons.visibility_off,
+                                  _obscureText
+                                      ? Icons.visibility
+                                      : Icons.visibility_off,
                                   color: Colors.white70,
                                 ),
-                                onPressed: () => setState(() => _obscureText = !_obscureText),
+                                onPressed:
+                                    () => setState(
+                                      () => _obscureText = !_obscureText,
+                                    ),
                               ),
                             ),
                             onSaved: (val) => _password = val!,
-                            validator: (val) => 
-                              val == null || val.length < 6 
-                                ? 'Password must be at least 6 characters' 
-                                : null,
+                            validator:
+                                (val) =>
+                                    val == null || val.length < 6
+                                        ? 'Password must be at least 6 characters'
+                                        : null,
                           ),
                           const SizedBox(height: 10),
 
-                          // 🆘 Forgot Password Link
-                          Align(
-                            alignment: Alignment.centerRight,
-                            child: TextButton(
-                              onPressed: () {
-                                // Add forgot password functionality
-                              },
-                              child: Text(
-                                'Forgot Password?',
-                                style: TextStyle(
-                                  color: Colors.tealAccent.shade100,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 20),
-
-                          // 🚀 Login Button
+                          SizedBox(height: 20),
+                          // Login Button
                           _isLoading
-                              ? const CircularProgressIndicator(color: Colors.white)
+                              ? const CircularProgressIndicator(
+                                color: Colors.white,
+                              )
                               : ElevatedButton.icon(
-                                  icon: const Icon(Icons.login, color: Colors.white),
-                                  label: const Text(
-                                    "Login",
-                                    style: TextStyle(fontSize: 16),
-                                  ),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.transparent,
-                                    foregroundColor: Colors.white,
-                                    shadowColor: Colors.transparent,
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 50, vertical: 14),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(30),
-                                      side: BorderSide(
-                                        color: Colors.white.withOpacity(0.4)),
-                                    ),
-                                    elevation: 0,
-                                  ),
-                                  onPressed: _login,
+                                icon: const Icon(
+                                  Icons.login,
+                                  color: Colors.white,
                                 ),
+                                label: const Text(
+                                  "Login",
+                                  style: TextStyle(fontSize: 16),
+                                ),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.transparent,
+                                  foregroundColor: Colors.white,
+                                  shadowColor: Colors.transparent,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 50,
+                                    vertical: 14,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(30),
+                                    side: BorderSide(
+                                      color: Colors.white.withOpacity(0.4),
+                                    ),
+                                  ),
+                                  elevation: 0,
+                                ),
+                                onPressed: _login,
+                              ),
                           const SizedBox(height: 25),
 
-                          // 🔄 Sign Up Redirect
+                          // Sign Up Redirect
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text(
+                              const Text(
                                 "Don't have an account?",
                                 style: TextStyle(color: Colors.white70),
                               ),
                               TextButton(
-                                onPressed: () => Navigator.pushReplacement(
-                                  context,
-                                  PageRouteBuilder(
-                                    pageBuilder: (context, animation, secondaryAnimation) => 
-                                       SignupPage(),
-                                    transitionsBuilder: 
-                                      (context, animation, secondaryAnimation, child) {
-                                        return SlideTransition(
-                                          position: Tween<Offset>(
-                                            begin: const Offset(1, 0),
-                                            end: Offset.zero,
-                                          ).animate(animation),
-                                          child: child,
-                                        );
-                                      },
-                                  ),
-                                ),
+                                onPressed:
+                                    () => Navigator.pushReplacement(
+                                      context,
+                                      PageRouteBuilder(
+                                        pageBuilder:
+                                            (
+                                              context,
+                                              animation,
+                                              secondaryAnimation,
+                                            ) => SignupPage(),
+                                        transitionsBuilder: (
+                                          context,
+                                          animation,
+                                          secondaryAnimation,
+                                          child,
+                                        ) {
+                                          return SlideTransition(
+                                            position: Tween<Offset>(
+                                              begin: const Offset(1, 0),
+                                              end: Offset.zero,
+                                            ).animate(animation),
+                                            child: child,
+                                          );
+                                        },
+                                      ),
+                                    ),
                                 child: Text(
                                   'Sign Up',
                                   style: TextStyle(
@@ -323,7 +362,7 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
       fillColor: Colors.white.withOpacity(0.08),
       contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
       enabledBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: Colors.white30),
+        borderSide: const BorderSide(color: Colors.white30),
         borderRadius: BorderRadius.circular(12),
       ),
       focusedBorder: OutlineInputBorder(
@@ -331,11 +370,11 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
         borderRadius: BorderRadius.circular(12),
       ),
       errorBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: Colors.red.shade300),
+        borderSide: const BorderSide(color: Colors.red),
         borderRadius: BorderRadius.circular(12),
       ),
       focusedErrorBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: Colors.red.shade300),
+        borderSide: const BorderSide(color: Colors.red),
         borderRadius: BorderRadius.circular(12),
       ),
     );

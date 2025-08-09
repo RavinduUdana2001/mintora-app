@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mintora/login.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'profile.dart';
 import 'support.dart';
@@ -9,7 +10,7 @@ import 'settings/delete_account_page.dart';
 import 'settings/theme_provider.dart';
 
 class SettingsPage extends StatefulWidget {
-  const SettingsPage({Key? key}) : super(key: key);
+  const SettingsPage({super.key});
 
   @override
   State<SettingsPage> createState() => _SettingsPageState();
@@ -33,6 +34,15 @@ class _SettingsPageState extends State<SettingsPage> {
     });
   }
 
+  Future<void> _logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear(); // Clears all shared preferences
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => LoginPage()),
+    );
+  }
+
   Future<void> _updateSetting(String key, bool value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(key, value);
@@ -43,10 +53,12 @@ class _SettingsPageState extends State<SettingsPage> {
     return Scaffold(
       backgroundColor: const Color(0xFF1e1e2c),
       appBar: AppBar(
-       backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
-title: Text("Settings", style: Theme.of(context).appBarTheme.titleTextStyle),
-iconTheme: Theme.of(context).appBarTheme.iconTheme,
-
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+        title: Text(
+          "Settings",
+          style: Theme.of(context).appBarTheme.titleTextStyle,
+        ),
+        iconTheme: Theme.of(context).appBarTheme.iconTheme,
       ),
       body: ListView(
         children: [
@@ -72,29 +84,7 @@ iconTheme: Theme.of(context).appBarTheme.iconTheme,
             },
           ),
 
-          _buildTile(Icons.delete, "Delete Account", () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const DeleteAccountPage()),
-            );
-          }, color: Colors.redAccent),
-
-
-          const Divider(color: Colors.white24),
-          _buildSectionHeader("Preferences"),
-
-        SwitchListTile(
-  activeColor: Colors.tealAccent,
-  title: const Text("Dark Mode", style: TextStyle(color: Colors.white)),
-  value: _darkMode,
-  onChanged: (val) {
-    setState(() => _darkMode = val);
-    _updateSetting('darkMode', val);
-  },
-),
-
-
-          SwitchListTile(
+          /*   SwitchListTile(
             activeColor: Colors.tealAccent,
             title: const Text(
               "Notifications",
@@ -105,8 +95,7 @@ iconTheme: Theme.of(context).appBarTheme.iconTheme,
               setState(() => _notifications = val);
               _updateSetting('notifications', val);
             },
-          ),
-
+          ),*/
           const Divider(color: Colors.white24),
           _buildSectionHeader("More Info"),
 
@@ -131,7 +120,22 @@ iconTheme: Theme.of(context).appBarTheme.iconTheme,
             );
           }),
 
-          const SizedBox(height: 30),
+          const SizedBox(height: 8),
+
+          const Divider(color: Colors.white24),
+          _buildSectionHeader('Danger Zone'),
+
+          _buildTile(Icons.delete, "Delete Account", () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const DeleteAccountPage()),
+            );
+          }, color: Colors.redAccent),
+
+          // Logout Section
+          _buildTile(Icons.logout, "Logout", () {
+            _logout(); // Logout function
+          }, color: Colors.redAccent),
         ],
       ),
     );

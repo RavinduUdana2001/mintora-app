@@ -1,9 +1,12 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart'; // For launching WhatsApp link
+import 'gallery.dart'; // Import the gallery page
 
 class ProductPage extends StatefulWidget {
   final Map<String, dynamic> product;
-  const ProductPage({required this.product});
+
+  const ProductPage({super.key, required this.product});
 
   @override
   _ProductPageState createState() => _ProductPageState();
@@ -12,17 +15,82 @@ class ProductPage extends StatefulWidget {
 class _ProductPageState extends State<ProductPage> {
   int _selectedImageIndex = 0;
 
+  // Function to open WhatsApp with product details
+  Future<void> _launchWhatsApp(String message) async {
+    final String phoneNumber = '+94717777017'; // Add your WhatsApp number here
+    final String url =
+        'https://wa.me/$phoneNumber?text=$message'; // Construct the WhatsApp URL
+
+    // Check if WhatsApp is installed
+    if (await canLaunch(url)) {
+      await launch(url); // Launch WhatsApp
+    } else {
+      // If WhatsApp is not installed, show a dialog to guide the user to download it
+      _showWhatsAppDownloadDialog();
+    }
+  }
+
+  // Show a dialog to tell the user to download WhatsApp
+  void _showWhatsAppDownloadDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('WhatsApp Not Found'),
+          content: const Text(
+            'It seems you don\'t have WhatsApp installed. Would you like to download it?',
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('No'),
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+            ),
+            TextButton(
+              child: const Text('Yes'),
+              onPressed: () async {
+                // Launch the Play Store or App Store to download WhatsApp
+                const String url =
+                    'https://play.google.com/store/apps/details?id=com.whatsapp'; // Google Play Store link
+                if (await canLaunch(url)) {
+                  await launch(url); // Open the Play Store
+                } else {
+                  throw 'Could not open Play Store';
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // Navigate to the GalleryScreen page
+  void _navigateToGallery() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => GalleryScreen(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final images = widget.product['image'] is String
-        ? List<String>.from(jsonDecode(widget.product['image'] ?? '[]'))
-        : List<String>.from(widget.product['image'] ?? []);
-
+    final images =
+        widget.product['image'] is String
+            ? List<String>.from(jsonDecode(widget.product['image'] ?? '[]'))
+            : List<String>.from(widget.product['image'] ?? []);
     final title = widget.product['title'] ?? '';
     final price = widget.product['price'] ?? '';
-    final description = (widget.product['description']?.toString().trim().isNotEmpty ?? false)
-        ? widget.product['description']
-        : 'No description available.';
+    final description =
+        (widget.product['description']?.toString().trim().isNotEmpty ?? false)
+            ? widget.product['description']
+            : 'No description available.';
+
+    final String message =
+        'I am interested in buying the "$title" for \$${price}. Details: $description';
 
     return Scaffold(
       backgroundColor: const Color(0xFF1e1e2c),
@@ -47,17 +115,18 @@ class _ProductPageState extends State<ProductPage> {
                       height: 250,
                       width: double.infinity,
                       fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => Container(
-                        height: 250,
-                        color: Colors.grey.shade800,
-                        child: const Center(
-                          child: Icon(
-                            Icons.image_not_supported,
-                            color: Colors.white,
-                            size: 50,
+                      errorBuilder:
+                          (context, error, stackTrace) => Container(
+                            height: 250,
+                            color: Colors.grey.shade800,
+                            child: const Center(
+                              child: Icon(
+                                Icons.image_not_supported,
+                                color: Colors.white,
+                                size: 50,
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -81,9 +150,10 @@ class _ProductPageState extends State<ProductPage> {
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(8),
                                 border: Border.all(
-                                  color: _selectedImageIndex == index
-                                      ? Colors.tealAccent
-                                      : Colors.transparent,
+                                  color:
+                                      _selectedImageIndex == index
+                                          ? Colors.tealAccent
+                                          : Colors.transparent,
                                   width: 2,
                                 ),
                               ),
@@ -94,15 +164,16 @@ class _ProductPageState extends State<ProductPage> {
                                   width: 70,
                                   height: 70,
                                   fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) => Container(
-                                    width: 70,
-                                    height: 70,
-                                    color: Colors.grey.shade800,
-                                    child: const Icon(
-                                      Icons.image_not_supported,
-                                      color: Colors.white,
-                                    ),
-                                  ),
+                                  errorBuilder:
+                                      (context, error, stackTrace) => Container(
+                                        width: 70,
+                                        height: 70,
+                                        color: Colors.grey.shade800,
+                                        child: const Icon(
+                                          Icons.image_not_supported,
+                                          color: Colors.white,
+                                        ),
+                                      ),
                                 ),
                               ),
                             ),
@@ -134,7 +205,7 @@ class _ProductPageState extends State<ProductPage> {
                   ),
                   const SizedBox(height: 20),
 
-                  // Description
+                  // Full Description
                   Text(
                     description,
                     style: const TextStyle(
@@ -154,13 +225,15 @@ class _ProductPageState extends State<ProductPage> {
             color: const Color(0xFF2b2d42),
             child: Row(
               children: [
+                // Left button (Navigate to Gallery)
                 Expanded(
                   child: ElevatedButton.icon(
-                    onPressed: () {
-                      // TODO: Add to cart logic
-                    },
-                    icon: const Icon(Icons.add_shopping_cart, color: Colors.white),
-                    label: const Text("Add to Cart", style: TextStyle(color: Colors.white)),
+                    onPressed: _navigateToGallery, // Navigate to the gallery
+                    icon: const Icon(Icons.photo_library, color: Colors.white),
+                    label: const Text(
+                      "View Gallery",
+                      style: TextStyle(color: Colors.white),
+                    ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF4ecdc4),
                       padding: const EdgeInsets.symmetric(vertical: 14),
@@ -171,13 +244,18 @@ class _ProductPageState extends State<ProductPage> {
                   ),
                 ),
                 const SizedBox(width: 12),
+
+                // Right button (Buy Now)
                 Expanded(
                   child: ElevatedButton.icon(
                     onPressed: () {
-                      // TODO: Buy now logic
+                      _launchWhatsApp(message); // Open WhatsApp with message
                     },
                     icon: const Icon(Icons.flash_on, color: Colors.white),
-                    label: const Text("Buy Now", style: TextStyle(color: Colors.white)),
+                    label: const Text(
+                      "Buy Now",
+                      style: TextStyle(color: Colors.white),
+                    ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFFf72585),
                       padding: const EdgeInsets.symmetric(vertical: 14),
@@ -186,11 +264,12 @@ class _ProductPageState extends State<ProductPage> {
                       ),
                     ),
                   ),
-            )],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
-      );
-    }
+          ),
+        ],
+      ),
+    );
   }
+}

@@ -9,8 +9,12 @@ import 'support.dart';
 import 'privacy_policy.dart';
 import 'about_us.dart';
 import 'settings.dart';
+import 'ai_challenge_page.dart'; // Import the AIChallengePage
+import 'package:url_launcher/url_launcher.dart';
 
 class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
   @override
   _HomePageState createState() => _HomePageState();
 }
@@ -47,11 +51,19 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  void _launchURL(Uri url) async {
+    if (await canLaunch(url.toString())) {
+      await launch(url.toString());
+    } else {
+      throw 'Could not launch $url';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final List<Widget> _pages = [
+    final List<Widget> pages = [
       OrderNowPage(),
-      Center(child: Text("Explore AI", style: TextStyle(color: Colors.white))),
+      AIChallengeCoinPage(), // Add the AIChallengePage here
       GalleryScreen(),
       ShopPage(),
     ];
@@ -59,29 +71,33 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       backgroundColor: const Color(0xFF1e1e2c),
       appBar: AppBar(
-        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
-        iconTheme: Theme.of(context).appBarTheme.iconTheme,
-        title: Text(
-          'Welcome $_userName',
-          style: Theme.of(context).appBarTheme.titleTextStyle,
-        ),
-        leading: Builder(
-          builder:
-              (context) => IconButton(
-                icon: const Icon(Icons.menu),
-                onPressed: () => Scaffold.of(context).openDrawer(),
+        backgroundColor: const Color(0xFF2b2d42),
+        iconTheme: const IconThemeData(color: Colors.white),
+        centerTitle: true, // Ensures title is centered even with drawer icon
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              Icons.waving_hand_rounded,
+              color: Colors.white,
+              size: 24,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              ' Welcome $_userName',
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
+                letterSpacing: 0.5,
               ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            tooltip: 'Logout',
-            onPressed: _logout,
-          ),
-        ],
       ),
-
-      drawer: Drawer(
+      // Use `endDrawer` instead of `drawer` to move the menu to the right side
+      endDrawer: Drawer(
         backgroundColor: const Color(0xFF2b2d42),
         child: ListView(
           padding: EdgeInsets.zero,
@@ -123,7 +139,6 @@ class _HomePageState extends State<HomePage> {
                               ),
                     ),
                   ),
-
                   const SizedBox(height: 10),
                   Text(
                     _userName,
@@ -143,10 +158,9 @@ class _HomePageState extends State<HomePage> {
                 ],
               ),
             ),
-
             // Profile
             ListTile(
-              leading: const Icon(Icons.person, color: Colors.white),
+              leading: const Icon(Icons.person, color: Colors.orange),
               title: const Text(
                 'Profile',
                 style: TextStyle(color: Colors.white),
@@ -160,35 +174,8 @@ class _HomePageState extends State<HomePage> {
               },
             ),
 
-            // Order Details (flat menu item)
             ListTile(
-              leading: const Icon(Icons.receipt_long, color: Colors.white),
-              title: const Text(
-                'Order Details',
-                style: TextStyle(color: Colors.white),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                // Navigate to Order Details screen
-              },
-            ),
-
-            // Notifications
-            ListTile(
-              leading: const Icon(Icons.notifications, color: Colors.white),
-              title: const Text(
-                'Notifications',
-                style: TextStyle(color: Colors.white),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                // Navigate to Notifications screen
-              },
-            ),
-
-            // Settings
-            ListTile(
-              leading: const Icon(Icons.settings, color: Colors.white),
+              leading: const Icon(Icons.settings, color: Colors.tealAccent),
               title: const Text(
                 'Settings',
                 style: TextStyle(color: Colors.white),
@@ -199,14 +186,11 @@ class _HomePageState extends State<HomePage> {
                   context,
                   MaterialPageRoute(builder: (_) => const SettingsPage()),
                 );
-                // Navigate to Settings screen
               },
             ),
 
-            // Help
-            // In your drawer ListTile for Help & Support:
             ListTile(
-              leading: const Icon(Icons.help_outline, color: Colors.white),
+              leading: const Icon(Icons.help_outline, color: Colors.blue),
               title: const Text(
                 'Help & Support',
                 style: TextStyle(color: Colors.white),
@@ -220,9 +204,8 @@ class _HomePageState extends State<HomePage> {
               },
             ),
 
-            // About Us
             ListTile(
-              leading: const Icon(Icons.info_outline, color: Colors.white),
+              leading: const Icon(Icons.info_outline, color: Colors.purple),
               title: const Text(
                 'About Us',
                 style: TextStyle(color: Colors.white),
@@ -236,11 +219,10 @@ class _HomePageState extends State<HomePage> {
               },
             ),
 
-            // Privacy Policy
             ListTile(
               leading: const Icon(
                 Icons.privacy_tip_outlined,
-                color: Colors.white,
+                color: Colors.red,
               ),
               title: const Text(
                 'Privacy Policy',
@@ -257,6 +239,30 @@ class _HomePageState extends State<HomePage> {
 
             const Divider(color: Colors.white24),
 
+            // Contact Us
+            ListTile(
+              leading: const Icon(Icons.phone, color: Colors.blueAccent),
+              title: const Text(
+                'Contact Us',
+                style: TextStyle(color: Colors.white),
+              ),
+              onTap: () {
+                final String phoneNumber =
+                    "+94717777017"; // Replace with your phone number
+                final String message =
+                    "Hello, I have a question about your services."; // Custom message
+                final Uri whatsappUrl = Uri.parse(
+                  "https://wa.me/$phoneNumber?text=${Uri.encodeComponent(message)}", // This is the WhatsApp URL format
+                );
+                _launchURL(
+                  whatsappUrl,
+                ); // This will open WhatsApp with the message pre-filled
+              },
+            ),
+
+            // Divider for separation
+            const Divider(color: Colors.white24),
+
             // Logout
             ListTile(
               leading: const Icon(Icons.logout, color: Colors.redAccent),
@@ -264,12 +270,12 @@ class _HomePageState extends State<HomePage> {
                 'Logout',
                 style: TextStyle(color: Colors.redAccent),
               ),
-              onTap: _logout,
+              onTap: _logout, // Your logout method here
             ),
           ],
         ),
       ),
-      body: _pages[_selectedIndex],
+      body: pages[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         backgroundColor: const Color(0xFF2b2d42),
@@ -279,7 +285,10 @@ class _HomePageState extends State<HomePage> {
         onTap: (index) => setState(() => _selectedIndex = index),
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.explore), label: 'AI'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.explore),
+            label: 'AI',
+          ), // "AI" menu
           BottomNavigationBarItem(
             icon: Icon(Icons.photo_album),
             label: 'Gallery',

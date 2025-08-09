@@ -2,26 +2,30 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:mintora/GalleryDetailPage';
 import 'package:video_player/video_player.dart';
-import 'package:photo_view/photo_view.dart';
-import 'media_viewer.dart'; // 👈 You will create this file
 
 class GalleryScreen extends StatefulWidget {
+  const GalleryScreen({super.key});
+
   @override
   State<GalleryScreen> createState() => _GalleryScreenState();
 }
 
 class _GalleryScreenState extends State<GalleryScreen> {
   List<dynamic> galleryItems = [];
+  List<dynamic> filteredGalleryItems = [];
   bool isLoading = true;
   bool isGrid = true;
-
   final String apiUrl = 'https://apps.aichallengecoin.com/app/gallery.php';
+
+  TextEditingController searchController = TextEditingController(); // Controller for search bar
 
   @override
   void initState() {
     super.initState();
     fetchGallery();
+    searchController.addListener(_filterGallery); // Add listener to the search controller
   }
 
   Future<void> fetchGallery() async {
@@ -32,6 +36,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
         if (data['status'] == true) {
           setState(() {
             galleryItems = data['data'];
+            filteredGalleryItems = galleryItems; // Initially, show all items
             isLoading = false;
           });
         }
@@ -39,6 +44,32 @@ class _GalleryScreenState extends State<GalleryScreen> {
     } catch (_) {
       setState(() => isLoading = false);
     }
+  }
+
+  // Filter the gallery items based on search input
+  void _filterGallery() {
+    final query = searchController.text.toLowerCase();
+    setState(() {
+      filteredGalleryItems = galleryItems.where((item) {
+        final title = item['header']?.toLowerCase() ?? '';
+        final description = item['description']?.toLowerCase() ?? '';
+        return title.contains(query) || description.contains(query);
+      }).toList();
+    });
+  }
+
+  // Function to handle the refresh action when the user pulls down
+  Future<void> _refreshGallery() async {
+    setState(() {
+      isLoading = true;  // Set loading to true while fetching
+    });
+    await fetchGallery();  // Fetch gallery data again
+  }
+
+  @override
+  void dispose() {
+    searchController.dispose(); // Dispose the controller
+    super.dispose();
   }
 
   @override
@@ -58,70 +89,102 @@ class _GalleryScreenState extends State<GalleryScreen> {
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator(color: Colors.tealAccent))
-          : Padding(
-              padding: const EdgeInsets.all(12),
-              child: GridView.builder(
-                itemCount: galleryItems.length,
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: isGrid ? 2 : 1,
-                  mainAxisSpacing: 16,
-                  crossAxisSpacing: 16,
-                  childAspectRatio: isGrid ? 0.75 : 1.4,
-                ),
-                itemBuilder: (context, index) {
-                  final item = galleryItems[index];
-                  final images = [
-                    item['image1'],
-                    item['image2'],
-                    item['image3']
-                  ].where((img) => img != null && img.toString().isNotEmpty).map((e) => e.toString()).toList();
-
-                  final video = item['video'];
-                  final hasVideo = video != null && video.toString().isNotEmpty;
-                  final mediaItems = [...images];
-                  if (hasVideo) mediaItems.add(video);
-
-                  return GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => MediaViewer(
-                            mediaItems: mediaItems,
-                            imageCount: images.length,
+          : RefreshIndicator(
+              onRefresh: _refreshGallery, // Refresh function called when pull-to-refresh is triggered
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  children: [
+                    // Search bar at the top
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      child: TextField(
+                        controller: searchController,
+                        style: const TextStyle(color: Colors.white),
+                        decoration: InputDecoration(
+                          hintText: 'Search by title or description',
+                          hintStyle: const TextStyle(color: Colors.white60),
+                          filled: true,
+                          fillColor: const Color(0xFF2b2d42),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(30),
+                            borderSide: BorderSide.none,
                           ),
+                          prefixIcon: const Icon(Icons.search, color: Colors.white),
                         ),
-                      );
-                    },
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF2b2d42),
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: const [
-                          BoxShadow(color: Colors.black26, blurRadius: 6, offset: Offset(2, 4)),
-                        ],
-                      ),
-                      child: Column(
-                        children: [
-                          Expanded(
-                            child: MediaSlider(mediaItems: mediaItems, imageCount: images.length),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(12),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(item['header'] ?? '', style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
-                                const SizedBox(height: 6),
-                                Text(item['description'] ?? '', style: const TextStyle(color: Colors.white70, fontSize: 13), maxLines: 3, overflow: TextOverflow.ellipsis),
-                              ],
-                            ),
-                          ),
-                        ],
                       ),
                     ),
-                  );
-                },
+
+                    // Gallery grid or list based on user's choice
+                    Expanded(
+                      child: GridView.builder(
+                        itemCount: filteredGalleryItems.length,
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: isGrid ? 2 : 1,
+                          mainAxisSpacing: 16,
+                          crossAxisSpacing: 16,
+                          childAspectRatio: isGrid ? 0.75 : 1.4,
+                        ),
+                        itemBuilder: (context, index) {
+                          final item = filteredGalleryItems[index];
+                          final images = [
+                            item['image1'],
+                            item['image2'],
+                            item['image3']
+                          ].where((img) => img != null && img.toString().isNotEmpty).map((e) => e.toString()).toList();
+
+                          final video = item['video'];
+                          final hasVideo = video != null && video.toString().isNotEmpty;
+                          final mediaItems = [...images];
+                          if (hasVideo) mediaItems.add(video);
+
+                          return GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => GalleryDetailPage(item: item), // Navigate to detailed page
+                                ),
+                              );
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF2b2d42),
+                                borderRadius: BorderRadius.circular(16),
+                                boxShadow: const [
+                                  BoxShadow(color: Colors.black26, blurRadius: 6, offset: Offset(2, 4)),
+                                ],
+                              ),
+                              child: Column(
+                                children: [
+                                  Expanded(
+                                    child: MediaSlider(mediaItems: mediaItems, imageCount: images.length),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(12),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          item['header'] ?? '',
+                                          style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                                          maxLines: 2, // Show only 2 lines of the header
+                                          overflow: TextOverflow.ellipsis, // Handle text overflow
+                                        ),
+                                        const SizedBox(height: 6),
+                                        Text(item['description'] ?? '', style: const TextStyle(color: Colors.white70, fontSize: 13), maxLines: 3, overflow: TextOverflow.ellipsis),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
     );
@@ -132,7 +195,7 @@ class MediaSlider extends StatefulWidget {
   final List<String> mediaItems;
   final int imageCount;
 
-  const MediaSlider({required this.mediaItems, required this.imageCount});
+  const MediaSlider({super.key, required this.mediaItems, required this.imageCount});
 
   @override
   State<MediaSlider> createState() => _MediaSliderState();
@@ -212,7 +275,7 @@ class _MediaSliderState extends State<MediaSlider> {
 
 class AutoPlayVideo extends StatefulWidget {
   final String videoUrl;
-  const AutoPlayVideo({required this.videoUrl});
+  const AutoPlayVideo({super.key, required this.videoUrl});
 
   @override
   State<AutoPlayVideo> createState() => _AutoPlayVideoState();

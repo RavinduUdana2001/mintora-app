@@ -6,7 +6,7 @@ import 'dart:convert';
 import '../login.dart';
 
 class DeleteAccountPage extends StatefulWidget {
-  const DeleteAccountPage({Key? key}) : super(key: key);
+  const DeleteAccountPage({super.key});
 
   @override
   State<DeleteAccountPage> createState() => _DeleteAccountPageState();
