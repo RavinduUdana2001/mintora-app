@@ -33,12 +33,12 @@ class _OrderNowPageState extends State<OrderNowPage>
   ];
 
   final List<Map<String, dynamic>> features = [
-    {'icon': Icons.design_services, 'text': 'Double-sided\ncoin design'},
-    {'icon': Icons.high_quality, 'text': 'High-resolution\nfiles'},
-    {'icon': Icons.timer, 'text': '3-day\ndelivery'},
-    {'icon': Icons.sync, 'text': '2 included\nrevisions'},
-    {'icon': Icons.architecture, 'text': 'Mint-ready\nfiles'},
-    {'icon': Icons.view_in_ar, 'text': '3D\nmockups'},
+    {'icon': Icons.design_services, 'text': 'Sketch to Striking'},
+    {'icon': Icons.high_quality, 'text': 'Designed for Perfection'},
+    {'icon': Icons.timer, 'text': 'Fast Turnaround'},
+    {'icon': Icons.sync, 'text': 'Rapid Revisions'},
+    {'icon': Icons.architecture, 'text': 'Engineered for Production'},
+    {'icon': Icons.view_in_ar, 'text': 'Manufacturer-Ready Files'},
   ];
 
   late AnimationController _controller;
@@ -185,7 +185,7 @@ class _OrderNowPageState extends State<OrderNowPage>
         backgroundColor: const Color(0xFF2b2d42),
         automaticallyImplyLeading: false, // ❌ removes back icon
         title: const Text(
-          'Order Custom Coin',
+          'Premium Designs',
           style: TextStyle(color: Colors.white, fontSize: 24),
         ),
         centerTitle: true,
@@ -211,23 +211,10 @@ class _OrderNowPageState extends State<OrderNowPage>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Centered Text
-                  Center(
-                    // This Center widget ensures the text is centered
-                    child: const Text(
-                      '🎖️ Custom Challenge Coin Design',
-                      style: TextStyle(
-                        fontSize: 21,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                        height: 1.4,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  buildStarAnimation(),
-                  const SizedBox(height: 20),
+
+                  //   buildStarAnimation(),
                   const Text(
-                    'Get a professionally designed custom challenge coin for your unit, organization, or event. Hand-crafted with precision and symbolism.',
+                    'AI Powered Premium Designs for Coins, Medals, Pins & PatchesMinting Ready, Worldwide Delivery',
                     style: TextStyle(
                       fontSize: 16,
                       color: Colors.white70,
@@ -235,7 +222,7 @@ class _OrderNowPageState extends State<OrderNowPage>
                     ),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 30),
+                  const SizedBox(height: 20),
                   Center(
                     child: ElevatedButton(
                       onPressed:
@@ -273,9 +260,14 @@ class _OrderNowPageState extends State<OrderNowPage>
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 children: [
-                  _buildGalleryImage('assets/12.jpg'),
-                  _buildGalleryImage('assets/123.jpg'),
-                  _buildGalleryImage('assets/1234.jpg'),
+                  _buildGalleryImage('assets/55.jpg'),
+                  _buildGalleryImage('assets/77.jpg'),
+                  _buildGalleryImage('assets/99.jpg'),
+                  _buildGalleryImage('assets/11.jpg'),
+                  _buildGalleryImage('assets/22.jpg'),
+                  _buildGalleryImage('assets/444.jpg'),
+                  _buildGalleryImage('assets/555.jpg'),
+                  _buildGalleryImage('assets/666.jpg'),
                 ],
               ),
             ),
@@ -321,7 +313,25 @@ class _OrderNowPageState extends State<OrderNowPage>
               ),
             ),
 
-         
+            _sectionTitle("Our Work Samples"),
+            SizedBox(
+              height: 200,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                children: [
+                  _buildGalleryImage('assets/aa.jpg'),
+                  _buildGalleryImage('assets/bb.jpg'),
+                  _buildGalleryImage('assets/cc.jpg'),
+                  _buildGalleryImage('assets/dd.jpg'),
+                  _buildGalleryImage('assets/ee.jpg'),
+                  _buildGalleryImage('assets/ff.jpg'),
+                  _buildGalleryImage('assets/111.jpg'),
+                  _buildGalleryImage('assets/222.jpg'),
+                  _buildGalleryImage('assets/333.jpg'),
+                ],
+              ),
+            ),
 
             // Testimonials
             _sectionTitle("Client Testimonials"),

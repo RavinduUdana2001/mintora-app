@@ -12,6 +12,7 @@ import 'privacy_policy.dart';
 import 'about_us.dart';
 import 'settings.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -75,30 +76,44 @@ class _HomePageState extends State<HomePage> {
         backgroundColor: const Color(0xFF2b2d42),
         iconTheme: const IconThemeData(color: Colors.white),
         centerTitle: true, // Ensures title is centered even with drawer icon
-        leading: Padding(padding: EdgeInsets.all(6),
-         child: Image.asset(
-            'assets/mintorav.png', // Your logo asset
-             height: 20,
-              width: 20,
-          ),),
+        leading: SizedBox(
+          width: 30, // total clickable area
+          child: Center(
+            child: Image.asset(
+              'assets/mintorav.png',
+              height: 30,
+              width: 30,
+              fit: BoxFit.contain,
+            ),
+          ),
+        ),
+
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(
-              Icons.waving_hand_rounded,
-              color: Colors.white,
-              size: 24,
-            ),
-            const SizedBox(width: 8),
+            /* Text(
+      '👋', // Simple emoji for a friendly touch
+      style: const TextStyle(fontSize: 20),
+    ),
+    const SizedBox(width: 6),
+    Text(
+      'Welcome $_userName',
+      style: const TextStyle(
+        fontSize: 20,
+        fontWeight: FontWeight.w600,
+        color: Colors.white,
+        letterSpacing: 0.3,
+      ),
+      overflow: TextOverflow.ellipsis,
+    ), */
             Text(
-              ' Welcome $_userName',
+              'Mintora',
               style: const TextStyle(
-                fontSize: 24,
+                fontSize: 27,
                 fontWeight: FontWeight.w600,
                 color: Colors.white,
-                letterSpacing: 0.5,
+                letterSpacing: 0.3,
               ),
-              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),
@@ -246,27 +261,25 @@ class _HomePageState extends State<HomePage> {
 
             const Divider(color: Colors.white24),
 
-          ListTile(
-  leading: const Icon(Icons.phone, color: Colors.blueAccent),
-  title: const Text(
-    'Contact Us',
-    style: TextStyle(color: Colors.white),
-  ),
-  onTap: () {
-    Navigator.pop(context);
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => const ContactUsPage()),
-    );
-  },
-),
-
+            ListTile(
+              leading: const Icon(Icons.phone, color: Colors.blueAccent),
+              title: const Text(
+                'Contact Us',
+                style: TextStyle(color: Colors.white),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const ContactUsPage()),
+                );
+              },
+            ),
 
             // Divider for separation
             const Divider(color: Colors.white24),
 
             // Logout
-           
           ],
         ),
       ),
@@ -280,10 +293,11 @@ class _HomePageState extends State<HomePage> {
         onTap: (index) => setState(() => _selectedIndex = index),
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.explore),
-            label: 'AI',
-          ), // "AI" menu
+BottomNavigationBarItem(
+  icon: Icon(Icons.auto_awesome, size: 22), // Spark/stars AI feel
+  label: 'AI',
+),
+// "AI" menu
           BottomNavigationBarItem(
             icon: Icon(Icons.photo_album),
             label: 'Portfolio',

@@ -44,6 +44,23 @@ flutter:
     - assets/1234.jpg
     - assets/123.jpg
     - assets/user.png
+    - assets/11.jpg
+    - assets/22.jpg
+    - assets/55.jpg
+    - assets/77.jpg
+    - assets/99.jpg
+    - assets/aa.jpg
+    - assets/bb.jpg
+    - assets/cc.jpg
+    - assets/dd.jpg
+    - assets/ee.jpg
+    - assets/ff.jpg
+    - assets/111.jpg
+    - assets/222.jpg
+    - assets/333.jpg
+    - assets/444.jpg
+    - assets/555.jpg
+    - assets/666.jpg
 
 flutter_icons:
   android: true
