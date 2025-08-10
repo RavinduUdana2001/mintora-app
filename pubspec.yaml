@@ -26,6 +26,9 @@ dependencies:
   provider: ^6.1.5
   webview_flutter: ^4.13.0
   flutter_downloader: ^1.12.0
+  in_app_purchase: ^3.2.3
+  connectivity_plus: ^6.1.4
+  flutter_native_splash: ^2.4.6
   
 
 dev_dependencies:
@@ -36,7 +39,7 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - assets/mintora.png
+    - assets/mintorav.png
     - assets/12.jpg
     - assets/1234.jpg
     - assets/123.jpg
@@ -45,4 +48,13 @@ flutter:
 flutter_icons:
   android: true
   ios: true
-  image_path: "assets/mintora.png"
+  image_path: "assets/mintorav.png"
+
+flutter_native_splash:
+  color: "#2b2d42"        # Background color for splash (your brand color)
+  image: assets/mintorav.png
+  android: true
+  ios: true
+  android_gravity: center
+  ios_content_mode: scaleAspectFit
+

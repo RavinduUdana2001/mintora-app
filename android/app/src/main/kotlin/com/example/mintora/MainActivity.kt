@@ -1,4 +1,4 @@
-package com.example.mintora
+package com.mintora.app
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -78,7 +78,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
       backgroundColor: const Color(0xFF1e1e2c),
       appBar: AppBar(
         backgroundColor: const Color(0xFF2b2d42),
-        title: const Text('Gallery', style: TextStyle(color: Colors.white)),
+        title: const Text('Portfolio', style: TextStyle(color: Colors.white)),
         centerTitle: true,
         actions: [
           IconButton(

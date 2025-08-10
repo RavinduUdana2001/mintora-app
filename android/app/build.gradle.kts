@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.mintora"
+    namespace = "com.mintora.app"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = "27.0.12077973"
 

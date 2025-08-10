@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:mintora/ai/mintora_ai_page.dart';
+import 'package:mintora/contact_us.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'login.dart';
 import 'shop.dart';
@@ -9,7 +11,6 @@ import 'support.dart';
 import 'privacy_policy.dart';
 import 'about_us.dart';
 import 'settings.dart';
-import 'ai_challenge_page.dart'; // Import the AIChallengePage
 import 'package:url_launcher/url_launcher.dart';
 
 class HomePage extends StatefulWidget {
@@ -63,7 +64,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     final List<Widget> pages = [
       OrderNowPage(),
-      AIChallengeCoinPage(), // Add the AIChallengePage here
+      const MintoraAIPage(), // AI page
       GalleryScreen(),
       ShopPage(),
     ];
@@ -74,6 +75,12 @@ class _HomePageState extends State<HomePage> {
         backgroundColor: const Color(0xFF2b2d42),
         iconTheme: const IconThemeData(color: Colors.white),
         centerTitle: true, // Ensures title is centered even with drawer icon
+        leading: Padding(padding: EdgeInsets.all(6),
+         child: Image.asset(
+            'assets/mintorav.png', // Your logo asset
+             height: 20,
+              width: 20,
+          ),),
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -239,39 +246,27 @@ class _HomePageState extends State<HomePage> {
 
             const Divider(color: Colors.white24),
 
-            // Contact Us
-            ListTile(
-              leading: const Icon(Icons.phone, color: Colors.blueAccent),
-              title: const Text(
-                'Contact Us',
-                style: TextStyle(color: Colors.white),
-              ),
-              onTap: () {
-                final String phoneNumber =
-                    "+94717777017"; // Replace with your phone number
-                final String message =
-                    "Hello, I have a question about your services."; // Custom message
-                final Uri whatsappUrl = Uri.parse(
-                  "https://wa.me/$phoneNumber?text=${Uri.encodeComponent(message)}", // This is the WhatsApp URL format
-                );
-                _launchURL(
-                  whatsappUrl,
-                ); // This will open WhatsApp with the message pre-filled
-              },
-            ),
+          ListTile(
+  leading: const Icon(Icons.phone, color: Colors.blueAccent),
+  title: const Text(
+    'Contact Us',
+    style: TextStyle(color: Colors.white),
+  ),
+  onTap: () {
+    Navigator.pop(context);
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const ContactUsPage()),
+    );
+  },
+),
+
 
             // Divider for separation
             const Divider(color: Colors.white24),
 
             // Logout
-            ListTile(
-              leading: const Icon(Icons.logout, color: Colors.redAccent),
-              title: const Text(
-                'Logout',
-                style: TextStyle(color: Colors.redAccent),
-              ),
-              onTap: _logout, // Your logout method here
-            ),
+           
           ],
         ),
       ),
@@ -291,7 +286,7 @@ class _HomePageState extends State<HomePage> {
           ), // "AI" menu
           BottomNavigationBarItem(
             icon: Icon(Icons.photo_album),
-            label: 'Gallery',
+            label: 'Portfolio',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.shopping_cart),

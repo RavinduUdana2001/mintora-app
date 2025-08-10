@@ -1,9 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // 👈 add this
 import 'package:mintora/auth_gate.dart';
 import 'package:provider/provider.dart';
 import 'settings/theme_provider.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // 🔒 Lock orientation to portrait only
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown, // remove this line if you want only upright
+  ]);
+
+  // Optional: set status bar style to match dark AppBar
+  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+    statusBarColor: Color(0xFF2b2d42), // Android status bar color
+    statusBarIconBrightness: Brightness.light, // Android
+    statusBarBrightness: Brightness.dark, // iOS
+  ));
+
   runApp(
     ChangeNotifierProvider(
       create: (_) => ThemeProvider(),
@@ -30,9 +46,9 @@ class CoinDesignerApp extends StatelessWidget {
   }
 }
 
+// ⬇️ keep your AppThemes exactly as-is
 class AppThemes {
-  // A shared PageTransitionsTheme to ensure iOS/macOS use Cupertino-style
-  static const PageTransitionsTheme _cupertinoTransitions =  
+  static const PageTransitionsTheme _cupertinoTransitions =
       PageTransitionsTheme(
         builders: {
           TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
@@ -62,7 +78,6 @@ class AppThemes {
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
     ),
-
     bottomNavigationBarTheme: const BottomNavigationBarThemeData(
       backgroundColor: Colors.deepPurple,
       selectedItemColor: Colors.white,
@@ -82,7 +97,6 @@ class AppThemes {
       secondary: Colors.tealAccent,
       surface: Colors.white,
     ),
-    // 👇 enable native iOS-like back-swipe
     pageTransitionsTheme: _cupertinoTransitions,
   );
 
@@ -104,7 +118,6 @@ class AppThemes {
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
     ),
-
     bottomNavigationBarTheme: const BottomNavigationBarThemeData(
       backgroundColor: Color(0xFF2b2d42),
       selectedItemColor: Colors.tealAccent,
@@ -124,7 +137,6 @@ class AppThemes {
       secondary: Colors.tealAccent,
       surface: Color(0xFF1e1e2c),
     ),
-    // 👇 enable native iOS-like back-swipe
     pageTransitionsTheme: _cupertinoTransitions,
   );
 }

@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
-import 'media_viewer.dart'; // You will create this file or import your own
+import 'media_viewer.dart'; // Your media viewer file
 
 class GalleryDetailPage extends StatefulWidget {
   final Map<String, dynamic> item;
@@ -15,15 +15,36 @@ class GalleryDetailPage extends StatefulWidget {
 class _GalleryDetailPageState extends State<GalleryDetailPage> {
   int _selectedImageIndex = 0;
 
+  /// Helper function to ensure URLs are correct
+  String formatImageUrl(String url) {
+    if (url.startsWith('http')) {
+      return url; // Already full URL
+    } else {
+      return 'https://apps.aichallengecoin.com/$url';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final images = widget.item['image1'] != null
-        ? [widget.item['image1'], widget.item['image2'], widget.item['image3']]
-            .where((image) => image != null && image.isNotEmpty)
-            .toList()
-        : [];
+    final rawImages = [
+      widget.item['image1'],
+      widget.item['image2'],
+      widget.item['image3']
+    ];
+
+    // Filter and convert to string
+    final images = rawImages
+        .where((image) => image != null && image.toString().isNotEmpty)
+        .map((e) => e.toString())
+        .toList();
+
+    // Debug logging
+ //   print("🔍 Raw image values from API: $rawImages");
+ //   print("✅ Processed images list: $images");
+
     final title = widget.item['header'] ?? '';
-    final description = widget.item['description'] ?? 'No description available.';
+    final description =
+        widget.item['description'] ?? 'No description available.';
 
     return Scaffold(
       backgroundColor: const Color(0xFF1e1e2c),
@@ -34,17 +55,16 @@ class _GalleryDetailPageState extends State<GalleryDetailPage> {
       ),
       body: Column(
         children: [
-          // Main Image Slider
           Expanded(
             child: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Main Product Image
+                  /// Main Image
                   ClipRRect(
                     borderRadius: BorderRadius.circular(12),
                     child: Image.network(
-                      'https://apps.aichallengecoin.com/${images[_selectedImageIndex]}',
+                      formatImageUrl(images[_selectedImageIndex]),
                       height: 250,
                       width: double.infinity,
                       fit: BoxFit.cover,
@@ -63,7 +83,7 @@ class _GalleryDetailPageState extends State<GalleryDetailPage> {
                   ),
                   const SizedBox(height: 16),
 
-                  // Image Thumbnails
+                  /// Thumbnails
                   if (images.length > 1)
                     SizedBox(
                       height: 70,
@@ -91,11 +111,12 @@ class _GalleryDetailPageState extends State<GalleryDetailPage> {
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(6),
                                 child: Image.network(
-                                  'https://apps.aichallengecoin.com/${images[index]}',
+                                  formatImageUrl(images[index]),
                                   width: 70,
                                   height: 70,
                                   fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) => Container(
+                                  errorBuilder:
+                                      (context, error, stackTrace) => Container(
                                     width: 70,
                                     height: 70,
                                     color: Colors.grey.shade800,
@@ -113,7 +134,7 @@ class _GalleryDetailPageState extends State<GalleryDetailPage> {
                     ),
                   if (images.length > 1) const SizedBox(height: 16),
 
-                  // Product Title
+                  /// Title
                   Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Text(
@@ -126,7 +147,7 @@ class _GalleryDetailPageState extends State<GalleryDetailPage> {
                     ),
                   ),
 
-                  // Description
+                  /// Description
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     child: Text(
